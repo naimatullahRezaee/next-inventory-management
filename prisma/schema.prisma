@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
 }
 
 datasource db {
@@ -14,3 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Product{
+  id String @id @default(cuid())
+  userId String // Stack Auth User ID 
+  name String 
+  sku String? @unique // unique identifier for each product that every company added to its product
+  price Decimal @db.Decimal(12,2)
+  quantity Int @default(0)
+  lowStockAt Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId, name])
+  @@index([createdAt])
+}
