@@ -1,3 +1,4 @@
+import { UserButton } from "@stackframe/stack";
 import { BarChart3, Package, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { it } from "node:test";
@@ -25,18 +26,28 @@ function Sidebar({ currentPath = "/dashboard" }: { currentPath: string }) {
         </div>
         {navigation.map((item, key) => {
           const IconComponent = item.icon;
+          const isActive = currentPath === item.href;
           return (
             <Link
-              className="flex items-center space-x-6"
+              className={`flex items-center space-x-3 py-2 px-3 rounded-lg ${
+                isActive
+                  ? "bg-purple-100 text-gray-800"
+                  : "hover:text-gray-800 text-gray-300"
+              }`}
               href={item.href}
               key={key}
             >
-              <IconComponent className="mr-3" />
-              {item.name}
+              <IconComponent className="w-5 h-5" />
+              <span className="text-sm">{item.name}</span>
             </Link>
           );
         })}
       </nav>
+      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-700">
+        <div className="flex items-center justify-between">
+          <UserButton showUserInfo />
+        </div>
+      </div>
     </div>
   );
 }
