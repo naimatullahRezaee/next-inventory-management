@@ -1,7 +1,7 @@
+import ProductsChart from "@/components/ProductsChart";
 import Sidebar from "@/components/Sidebar";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 import { TrendingUp } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -20,6 +20,31 @@ export default async function DashboardPage() {
       select: { price: true, quantity: true, createdAt: true },
     }),
   ]);
+
+  const now = new Date();
+  const weeklyProductsData = [];
+  for (let i = 11; i >= 0; i--) {
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - i * 7);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}/ ${String(weekStart.getDate() + 1).padStart(2, "0")}`;
+
+    const weekProducts = allProducts.filter((product) => {
+      const productDate = new Date(product.createdAt);
+      return productDate >= weekStart && productDate <= weekEnd;
+    });
+    weeklyProductsData.push({
+      week: weekLabel,
+      products: weekProducts.length,
+    });
+  }
 
   const recent = await prisma.product.findMany({
     where: { userId },
@@ -94,6 +119,15 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
+          {/* Inventory over time */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2>New Products per week</h2>
+            </div>
+            <div className="h-48">
+              <ProductsChart data={weeklyProductsData} />
+            </div>
+          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -107,7 +141,7 @@ export default async function DashboardPage() {
                 const stockLevel =
                   product.quantity === 0
                     ? 0
-                    : product.quantity <= Number(product.createdAt || 5)
+                    : product.quantity <= Number(product.lowStockAt || 5)
                     ? 1
                     : 2;
                 const bgColors = [
