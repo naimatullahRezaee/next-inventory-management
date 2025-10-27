@@ -21,6 +21,23 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  const inStockCount = allProducts.filter((p) => Number(p.quantity) > 5).length;
+  const lowStockCount = allProducts.filter(
+    (p) => Number(p.quantity) <= 5 && Number(p.quantity)
+  ).length;
+  const outOfStockCount = allProducts.filter(
+    (p) => Number(p.quantity) === 0
+  ).length;
+
+  const inStockpercentage =
+    totalPorducts > 0 ? Math.round((inStockCount / totalPorducts) * 100) : 0;
+
+  const lowStockpercentage =
+    totalPorducts > 0 ? Math.round((lowStockCount / totalPorducts) * 100) : 0;
+
+  const outOfStockpercentage =
+    totalPorducts > 0 ? Math.round((outOfStockCount / totalPorducts) * 100) : 0;
+
   const now = new Date();
   const weeklyProductsData = [];
   for (let i = 11; i >= 0; i--) {
@@ -175,6 +192,57 @@ export default async function DashboardPage() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+          {/* Efficiency section*/}
+          <div className="bg-white rounded-lg border border-gray-200 p-6 ">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Efficieny</h2>
+            </div>
+            <div className="flex items-center justify-center">
+              <div className="relative w-48 h-48">
+                {/* Gray background circle */}
+                <div className="absolute inset-0 rounded-full border-8 border-gray-200"></div>
+
+                {/* Purple progress circle */}
+                <div
+                  className="absolute inset-0 rounded-full border-8 border-purple-600"
+                  style={{
+                    clipPath:
+                      "polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%)",
+                  }}
+                ></div>
+
+                {/* Centered text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {inStockpercentage}%
+                    </div>
+                    <div className="text-sm text-gray-600">In Stock</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 space-y-2">
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-200" />
+                  <span>In Stock ({inStockpercentage}%)</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-600" />
+                  <span>Low Stock ({lowStockpercentage}%)</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-200" />
+                  <span>Out of Stock({outOfStockpercentage}%)</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

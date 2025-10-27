@@ -1,7 +1,6 @@
 import { UserButton } from "@stackframe/stack";
 import { BarChart3, Package, Plus, Settings } from "lucide-react";
 import Link from "next/link";
-import { it } from "node:test";
 import React from "react";
 
 function Sidebar({ currentPath = "/dashboard" }: { currentPath: string }) {
@@ -32,7 +31,7 @@ function Sidebar({ currentPath = "/dashboard" }: { currentPath: string }) {
               className={`flex items-center space-x-3 py-2 px-3 rounded-lg ${
                 isActive
                   ? "bg-purple-100 text-gray-800"
-                  : "hover:text-gray-800 text-gray-300"
+                  : "hover:text-gray-500 text-gray-300"
               }`}
               href={item.href}
               key={key}
