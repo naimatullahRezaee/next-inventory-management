@@ -14,6 +14,8 @@ export default async function InventoryPage({
   const q = (params.q ?? "").trim();
   const user = await getCurrentUser();
   const userId = user.id;
+  const pageSize = 5;
+  const page = Math.max(1, Number(params.page ?? 1));
 
   const where = {
     userId,
@@ -22,12 +24,16 @@ export default async function InventoryPage({
 
   const [totalCount, items] = await Promise.all([
     prisma.product.count({ where }),
-    prisma.product.findMany({ where }),
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
   ]);
 
-  const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const page = Math.max(1, Number(params.page ?? 1));
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar currentPath="/inventory" />
