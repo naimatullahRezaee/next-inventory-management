@@ -1,21 +1,33 @@
+import Pagination from "@/components/pagination";
 import Sidebar from "@/components/Sidebar";
 import { deleteProduct } from "@/lib/actions/products";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Trash, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 export default async function InventoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const user = await getCurrentUser();
   const userId = user.id;
-  const totalProducts = await prisma.product.findMany({
-    where: { userId, name: { contains: q, mode: "insensitive" } },
-  });
+
+  const where = {
+    userId,
+    ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}),
+  };
+
+  const [totalCount, items] = await Promise.all([
+    prisma.product.count({ where }),
+    prisma.product.findMany({ where }),
+  ]);
+
+  const pageSize = 10;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const page = Math.max(1, Number(params.page ?? 1));
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar currentPath="/inventory" />
@@ -72,7 +84,7 @@ export default async function InventoryPage({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-300">
-                {totalProducts.map((product, key) => (
+                {items.map((product, key) => (
                   <tr key={key} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {product.name}
@@ -107,6 +119,19 @@ export default async function InventoryPage({
               </tbody>
             </table>
           </div>
+          {totalPages > 1 && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                baseUrl="/inventory"
+                searchParams={{
+                  q,
+                  pageSize: String(pageSize),
+                }}
+              />
+            </div>
+          )}
         </div>
       </main>
     </div>
